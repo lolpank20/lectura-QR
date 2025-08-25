@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Generado</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin: 40px; }
+    #qrcode { margin: 30px auto; }
+    table { margin: 0 auto; border-collapse: collapse; }
+    td { padding: 4px 8px; border: 1px solid #eee; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+</head>
+<body>
+  <h2>QR Generado</h2>
+  <canvas id="qrcode"></canvas>
+  <h3>Datos de la transacción</h3>
+  <table id="dataTable"></table>
+  <script>
+    // Obtener los datos enviados por POST (simulación para PoC)
+    function getQueryParams() {
+      const params = new URLSearchParams(window.location.search);
+      let obj = {};
+      for (const [key, value] of params.entries()) {
+        obj[key] = value;
+      }
+      return obj;
+    }
+    // Para la PoC, los datos se pueden pasar por querystring o por un script inyectado por el backend
+    // Aquí simulamos que el backend inyecta los datos como un objeto global
+    const data = window.qrData || getQueryParams();
+    // Mostrar datos en tabla
+    const table = document.getElementById('dataTable');
+    Object.entries(data).forEach(([k, v]) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td><b>${k}</b></td><td>${v}</td>`;
+      table.appendChild(row);
+    });
+    // Generar QR con los datos concatenados
+    const qr = new QRious({
+      element: document.getElementById('qrcode'),
+      value: JSON.stringify(data),
+      size: 220
+    });
+  </script>
+</body>
+</html>
