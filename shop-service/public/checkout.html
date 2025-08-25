@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tienda Demo - Checkout</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <img src="img/logoavvillas.jpg" alt="Banco AV Villas" style="height:60px;vertical-align:middle;">
+    <h1 style="display:inline; margin-left:18px;">Tienda Demo</h1>
+  </header>
+  <nav>
+    <a href="index.html">Catálogo</a>
+    <a href="cart.html">Carrito</a>
+    <a href="checkout.html">Checkout</a>
+  </nav>
+  <div class="container">
+    <h2>Resumen de Compra</h2>
+    <div id="summary"></div>
+    <h2 style="margin-top:32px;">Datos de Pago</h2>
+    <div class="payment-methods">
+      <div class="pay-method" id="pay-breb" tabindex="0">
+        <img src="img/BreB.jpg" alt="BRE-B by Aval">
+        <span>BRE-B by Aval</span>
+      </div>
+      <div class="pay-method" id="pay-pse" tabindex="0">
+        <img src="img/pselogo.png" alt="PSE">
+        <span>PSE</span>
+      </div>
+      <div class="pay-method" id="pay-paypal" tabindex="0">
+        <img src="img/PayPal_Logo2014.jpg" alt="PayPal">
+        <span>PayPal</span>
+      </div>
+    </div>
+    <div class="dropdown" id="dropdownDatos">
+      <div class="dropdown-header" onclick="this.parentNode.classList.toggle('open')">
+        <span>Datos técnicos de pago (mostrar/ocultar)</span>
+        <span style="margin-left:auto;font-size:1.3em;">&#9660;</span>
+      </div>
+      <div class="dropdown-content">
+        <form id="payForm" autocomplete="off">
+          <label>Client ID <input name="client_id" value="comercio123" required></label>
+          <label>Client Secret <input name="client_secret" value="s3cr3t987" required></label>
+          <label>Scope <input name="scope" value="pagos" required></label>
+          <label>Código Nura <input name="codigo_nura" value="NURA-20250825-001" required></label>
+          <label>NIT Compañía <input name="nit_compania" value="900123456" required></label>
+          <label>ID Banco Recaudador <input name="id_banco" value="1001" required></label>
+          <label>Referencia de Pago <input name="referencia_pago" value="REF-0001" required></label>
+          <label>Tipo Canal <input name="tipo_canal" value="WEB" required></label>
+          <label>Fecha Expiración Pago <input name="fecha_expiracion" type="datetime-local" required></label>
+          <input name="monto" type="hidden">
+          <input name="iva" type="hidden">
+          <input name="base" type="hidden">
+        </form>
+      </div>
+    </div>
+    <div style="margin:24px 0 18px 0;">
+      <b>Monto:</b> <span id="montoResumen"></span> &nbsp; | &nbsp;
+      <b>IVA:</b> <span id="ivaResumen"></span> &nbsp; | &nbsp;
+      <b>Base:</b> <span id="baseResumen"></span>
+    </div>
+    <iframe id="payFrame" src="payment-iframe.html" width="400" height="500" style="display:block;margin:32px auto 0 auto;"></iframe>
+    <!-- Modal para métodos de pago no disponibles -->
+    <div id="modalMsg" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; align-items:center; justify-content:center; z-index:2000;">
+      <div class='modal-bg' style="position: fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); z-index:2001;"></div>
+      <div class='modal-content' style="position: fixed; left:50%; top:50%; transform:translate(-50%,-50%); background:#fff; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.18); padding:32px 40px; z-index:2002; min-width:320px; max-width:90vw; display:flex; flex-direction:column; align-items:center;">
+        <span class='modal-close' style="position:absolute; right:18px; top:12px; font-size:2em; color:#e10600; cursor:pointer; font-weight:bold;">&times;</span>
+        <div id='modalText' style="margin-top:18px; font-size:1.15em; color:#003366;"></div>
+      </div>
+    </div>
+    <script>
+      // Mostrar resumen de compra
+      const products = [
+        {id:1, name:'Camiseta Roja', price:35000},
+        {id:2, name:'Gorra Azul', price:22000},
+        {id:3, name:'Termo Blanco', price:28000},
+        {id:4, name:'Mug Edición Especial', price:18000}
+      ];
+      let cart = JSON.parse(localStorage.getItem('cart')||'[]');
+      let total = 0, iva = 0, base = 0;
+      let html = '<table><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr>';
+      cart.forEach(item => {
+        const prod = products.find(p=>p.id===item.id);
+        const subtotal = prod.price * item.qty;
+        total += subtotal;
+        html += `<tr><td>${prod.name}</td><td>${item.qty}</td><td>$${prod.price.toLocaleString()}</td><td>$${subtotal.toLocaleString()}</td></tr>`;
+      });
+      iva = Math.round(total * 0.19);
+      base = total - iva;
+      html += `<tr><th colspan="3">Total</th><th>$${total.toLocaleString()}</th></tr></table>`;
+      document.getElementById('summary').innerHTML = html;
+      // Llenar campos monto, iva y base
+      document.querySelector('input[name="monto"]').value = total;
+      document.querySelector('input[name="iva"]').value = iva;
+      document.querySelector('input[name="base"]').value = base;
+      document.getElementById('montoResumen').textContent = `$${total.toLocaleString()}`;
+      document.getElementById('ivaResumen').textContent = `$${iva.toLocaleString()}`;
+      document.getElementById('baseResumen').textContent = `$${base.toLocaleString()}`;
+      // Métodos de pago
+      const methods = document.querySelectorAll('.pay-method');
+      methods.forEach(m => {
+        m.onclick = () => {
+          methods.forEach(x => x.classList.remove('selected'));
+          m.classList.add('selected');
+          if(m.id === 'pay-breb') {
+            // Enviar datos al iframe y generar QR
+            const form = document.getElementById('payForm');
+            const data = Object.fromEntries(new FormData(form).entries());
+            const frame = document.getElementById('payFrame');
+            frame.contentWindow.postMessage({type:'pago', data}, '*');
+            // Mensaje visual opcional
+            // showModal('Datos enviados a BRE-B. QR generado en el botón de pago.');
+          } else if(m.id === 'pay-pse') {
+            showModal('<b>PSE</b> no está disponible en esta demo.');
+          } else if(m.id === 'pay-paypal') {
+            showModal('<b>PayPal</b> no está disponible en esta demo.');
+          }
+        };
+      });
+      document.getElementById('pay-breb').classList.add('selected');
+      // Modal visual elegante
+      function showModal(msg) {
+        let modal = document.getElementById('modalMsg');
+        document.getElementById('modalText').innerHTML = msg;
+        modal.style.display = 'flex';
+        modal.querySelector('.modal-close').onclick = () => modal.style.display = 'none';
+        modal.querySelector('.modal-bg').onclick = () => modal.style.display = 'none';
+      }
+    </script>
+  </div>
+</body>
+</html>

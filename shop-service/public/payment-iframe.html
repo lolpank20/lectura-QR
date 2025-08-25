@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Botón de Pago QR</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <img src="img/logoavvillas.jpg" alt="Banco AV Villas" style="height:50px;vertical-align:middle;">
+    <h2 style="display:inline; margin-left:12px;">Botón de Pago QR</h2>
+  </header>
+  <div class="container" style="max-width:420px;">
+    <div id="status" style="margin-bottom:18px; color:#0055a4; font-weight:600;">Esperando datos de pago...</div>
+    <button class="btn" id="genBtn" style="display:none;">Generar QR</button>
+    <div id="qrFrameWrap" style="margin-top:24px;display:none;">
+      <iframe id="qrFrame" width="320" height="340" style="background:#fff;"></iframe>
+    </div>
+    <button class="btn" id="resetBtn" style="display:none;margin-top:18px;background:#fff;color:#e10600;border:2px solid #e10600;">Limpiar y volver a empezar</button>
+  </div>
+  <script>
+    let pagoData = null;
+    window.addEventListener('message', function(e) {
+      if(e.data && e.data.type==='pago') {
+        pagoData = e.data.data;
+        document.getElementById('status').textContent = 'Datos recibidos. Listo para generar QR.';
+        document.getElementById('genBtn').style.display = 'inline-block';
+        document.getElementById('resetBtn').style.display = 'none';
+        document.getElementById('qrFrameWrap').style.display = 'none';
+      }
+    });
+    document.getElementById('genBtn').onclick = function() {
+      if(!pagoData) return;
+      // Construir querystring para enviar datos al qr-service
+      const params = new URLSearchParams(pagoData).toString();
+      document.getElementById('qrFrame').src = `http://localhost:3002/generate?${params}`;
+      document.getElementById('qrFrameWrap').style.display = 'block';
+      document.getElementById('status').textContent = 'QR generado. Escanéalo para pagar.';
+      document.getElementById('genBtn').style.display = 'none';
+      document.getElementById('resetBtn').style.display = 'inline-block';
+    };
+    document.getElementById('resetBtn').onclick = function() {
+      pagoData = null;
+      document.getElementById('status').textContent = 'Esperando datos de pago...';
+      document.getElementById('genBtn').style.display = 'none';
+      document.getElementById('qrFrameWrap').style.display = 'none';
+      document.getElementById('resetBtn').style.display = 'none';
+      document.getElementById('qrFrame').src = '';
+    };
+  </script>
+</body>
+</html>

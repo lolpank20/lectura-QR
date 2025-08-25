@@ -1,0 +1,11 @@
+# Ignorar dependencias de Node.js
+test/
+node_modules/
+shop-service/node_modules/
+qr-service/node_modules/
+# Archivos de entorno
+.env
+# Archivos temporales
+*.log
+.DS_Store
+Thumbs.db
