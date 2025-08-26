@@ -49,7 +49,7 @@
           <label>ID Banco Recaudador <input name="id_banco" value="1001" required></label>
           <label>Referencia de Pago <input name="referencia_pago" value="REF-0001" required></label>
           <label>Tipo Canal <input name="tipo_canal" value="WEB" required></label>
-          <label>Fecha Expiración Pago <input name="fecha_expiracion" type="datetime-local" required></label>
+          <!-- La expiración del QR se maneja solo en frontend, no se envía en el JSON -->
           <input name="monto" type="hidden">
           <input name="iva" type="hidden">
           <input name="base" type="hidden">
@@ -61,7 +61,7 @@
       <b>IVA:</b> <span id="ivaResumen"></span> &nbsp; | &nbsp;
       <b>Base:</b> <span id="baseResumen"></span>
     </div>
-    <iframe id="payFrame" src="payment-iframe.html" width="400" height="500" style="display:block;margin:32px auto 0 auto;"></iframe>
+  <iframe id="payFrame" src="payment-iframe.html" width="400" height="500" style="display:block;margin:32px auto 0 auto;"></iframe>
     <!-- Modal para métodos de pago no disponibles -->
     <div id="modalMsg" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; align-items:center; justify-content:center; z-index:2000;">
       <div class='modal-bg' style="position: fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.25); z-index:2001;"></div>
@@ -104,22 +104,24 @@
         m.onclick = () => {
           methods.forEach(x => x.classList.remove('selected'));
           m.classList.add('selected');
+          const frame = document.getElementById('payFrame');
           if(m.id === 'pay-breb') {
-            // Enviar datos al iframe y generar QR
+            // Mostrar QR y enviar datos
+            frame.style.display = 'block';
             const form = document.getElementById('payForm');
             const data = Object.fromEntries(new FormData(form).entries());
-            const frame = document.getElementById('payFrame');
             frame.contentWindow.postMessage({type:'pago', data}, '*');
-            // Mensaje visual opcional
-            // showModal('Datos enviados a BRE-B. QR generado en el botón de pago.');
           } else if(m.id === 'pay-pse') {
+            frame.style.display = 'none';
             showModal('<b>PSE</b> no está disponible en esta demo.');
           } else if(m.id === 'pay-paypal') {
+            frame.style.display = 'none';
             showModal('<b>PayPal</b> no está disponible en esta demo.');
           }
         };
       });
       document.getElementById('pay-breb').classList.add('selected');
+      document.getElementById('payFrame').style.display = 'block';
       // Modal visual elegante
       function showModal(msg) {
         let modal = document.getElementById('modalMsg');

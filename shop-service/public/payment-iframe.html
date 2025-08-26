@@ -11,16 +11,18 @@
     <img src="img/logoavvillas.jpg" alt="Banco AV Villas" style="height:50px;vertical-align:middle;">
     <h2 style="display:inline; margin-left:12px;">Botón de Pago QR</h2>
   </header>
-  <div class="container" style="max-width:420px;">
+  <div style="max-width:420px;margin:0 auto;text-align:center;">
     <div id="status" style="margin-bottom:18px; color:#0055a4; font-weight:600;">Esperando datos de pago...</div>
     <button class="btn" id="genBtn" style="display:none;">Generar QR</button>
     <div id="qrFrameWrap" style="margin-top:24px;display:none;">
-      <iframe id="qrFrame" width="320" height="340" style="background:#fff;"></iframe>
+      <h2 style="margin-bottom:18px;">QR de Pago</h2>
+      <iframe id="qrFrame" width="340" height="360" style="background:#fff;border:none;box-shadow:0 4px 24px #00336622;border-radius:18px;"></iframe>
     </div>
     <button class="btn" id="resetBtn" style="display:none;margin-top:18px;background:#fff;color:#e10600;border:2px solid #e10600;">Limpiar y volver a empezar</button>
   </div>
   <script>
     let pagoData = null;
+    let qrTimeout = null;
     window.addEventListener('message', function(e) {
       if(e.data && e.data.type==='pago') {
         pagoData = e.data.data;
@@ -30,6 +32,12 @@
         document.getElementById('qrFrameWrap').style.display = 'none';
       }
     });
+    function limpiarQRporExpiracion() {
+      document.getElementById('qrFrame').src = '';
+      document.getElementById('qrFrameWrap').style.display = 'none';
+      document.getElementById('status').textContent = 'El QR ha expirado. Vuelve a generar el pago.';
+      document.getElementById('resetBtn').style.display = 'inline-block';
+    }
     document.getElementById('genBtn').onclick = function() {
       if(!pagoData) return;
       // Construir querystring para enviar datos al qr-service
@@ -39,6 +47,8 @@
       document.getElementById('status').textContent = 'QR generado. Escanéalo para pagar.';
       document.getElementById('genBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'inline-block';
+      if(qrTimeout) clearTimeout(qrTimeout);
+      qrTimeout = setTimeout(limpiarQRporExpiracion, 60 * 1000); // 1 min
     };
     document.getElementById('resetBtn').onclick = function() {
       pagoData = null;
@@ -47,6 +57,7 @@
       document.getElementById('qrFrameWrap').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'none';
       document.getElementById('qrFrame').src = '';
+      if(qrTimeout) clearTimeout(qrTimeout);
     };
   </script>
 </body>
