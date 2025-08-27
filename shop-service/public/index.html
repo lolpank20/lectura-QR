@@ -7,22 +7,28 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header style="display:flex;align-items:center;justify-content:space-between;gap:24px;">
-    <div style="display:flex;align-items:center;gap:18px;">
-      <img src="img/logoavvillas.jpg" alt="Banco AV Villas" style="height:60px;vertical-align:middle;">
-      <h1 style="display:inline; margin-left:0;">Tienda Demo</h1>
-    </div>
-    <a href="cart.html" title="Ver carrito" style="margin-right:24px;">
-      <img src="img/cart.svg" alt="Carrito" style="height:38px;width:38px;vertical-align:middle;filter:drop-shadow(0 2px 4px #0055a4aa);">
-    </a>
+  <header style="display:flex;align-items:center;gap:18px;">
+  <img src="img/logoavvillas.jpg" alt="Banco AV Villas" style="height:60px;vertical-align:middle;">
+  <h1 style="display:inline; margin-left:0;">Tienda AV Villas</h1>
   </header>
   <nav>
     <a href="index.html">Catálogo</a>
     <a href="cart.html">Carrito</a>
   </nav>
   <div class="container">
-    <h2>Catálogo de Productos</h2>
-    <div id="product-list"></div>
+    <div style="display:flex;align-items:flex-start;gap:32px;">
+      <div style="flex:1;">
+        <h2>Catálogo de Productos</h2>
+        <div id="product-list"></div>
+      </div>
+      <div id="cart-access" style="min-width:120px;max-width:180px;position:sticky;top:32px;align-self:flex-start;">
+        <a href="cart.html" title="Ver carrito" style="display:flex;flex-direction:column;align-items:center;gap:8px;background:#fff;border-radius:12px;box-shadow:0 2px 12px #0055a422;padding:18px 12px 12px 12px;text-decoration:none;position:relative;">
+          <span id="cart-count" style="position:absolute;top:6px;right:18px;background:#e10600;color:#fff;font-size:1em;font-weight:bold;border-radius:50%;padding:2px 8px;min-width:24px;text-align:center;box-shadow:0 2px 6px #e1060033;z-index:2;display:none;">0</span>
+          <img src="img/carritoDeCompras.png" alt="Carrito" style="height:48px;width:48px;vertical-align:middle;filter:drop-shadow(0 2px 4px #0055a4aa);">
+          <span style="font-size:1.1em;color:#003366;font-weight:600;">Ver Carrito</span>
+        </a>
+      </div>
+    </div>
   </div>
   <script>
     const products = [
@@ -35,6 +41,17 @@
       const list = document.getElementById('product-list');
       list.innerHTML = '';
       let cart = JSON.parse(localStorage.getItem('cart')||'[]');
+      // Actualizar contador de carrito
+      let totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+      const cartCount = document.getElementById('cart-count');
+      if(cartCount) {
+        if(totalItems > 0) {
+          cartCount.textContent = totalItems;
+          cartCount.style.display = 'block';
+        } else {
+          cartCount.style.display = 'none';
+        }
+      }
       products.forEach(p => {
         const div = document.createElement('div');
         div.style.display = 'flex';
