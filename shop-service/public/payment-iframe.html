@@ -48,7 +48,7 @@
       document.getElementById('genBtn').style.display = 'none';
       document.getElementById('resetBtn').style.display = 'inline-block';
       if(qrTimeout) clearTimeout(qrTimeout);
-      qrTimeout = setTimeout(limpiarQRporExpiracion, 60 * 1000); // 1 min
+      qrTimeout = setTimeout(limpiarQRporExpiracion, 30 * 1000); // 30 seg
     };
     document.getElementById('resetBtn').onclick = function() {
       pagoData = null;
